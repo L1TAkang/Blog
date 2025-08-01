@@ -1,589 +1,677 @@
 <!DOCTYPE html>
+
 <html lang="ko">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>동적 룩북 모듈</title>
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <style>
-        body {
-            font-family: 'Pretendard', sans-serif;
-            background-color: #ffffff; /* 흰색 배경 */
-            display: flex;
-            flex-direction: column; /* 세로로 정렬 */
-            align-items: center; /* 가운데 정렬 */
-            min-height: 100vh;
-            margin: 0; /* 기존 padding 제거 */
-            box-sizing: border-box;
-            overflow-x: hidden; /* 가로 스크롤 방지 */
-        }
 
-        /* 입력 폼 스타일 */
-        .input-form {
-            max-width: 600px;
-            width: 100%;
-            background-color: #f9f9f9;
-            border: 1px solid #eee;
-            padding: 25px;
-            border-radius: 8px;
-            margin-bottom: 40px; /* 룩북 모듈과의 간격 */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .input-group label {
-            font-size: 15px;
-            font-weight: bold;
-            color: #333;
-            display: flex; /* 가이드 텍스트와 함께 정렬 */
-            align-items: center;
-            gap: 5px; /* 라벨과 가이드 텍스트 사이 간격 */
-        }
-        .input-group label small {
-            font-size: 12px; /* 가이드 텍스트 폰트 크기 */
-            font-weight: normal;
-            color: #777;
-        }
-        .input-group input[type="text"],
-        .input-group textarea,
-        .input-group input[type="color"] { /* color input type 추가 */
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-family: 'Pretendard', sans-serif;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-        .input-group input[type="color"] {
-            height: 40px; /* 컬러 피커 높이 조정 */
-            padding: 0; /* 컬러 피커 패딩 제거 */
-            cursor: pointer;
-        }
-        .input-group textarea {
-            resize: vertical; /* 세로 크기 조절 가능 */
-            min-height: 80px;
-        }
-        .input-group input[type="file"] {
-            padding: 5px 0;
-        }
-        .update-button {
-            background-color: #5cb85c; /* 업데이트 버튼 색상 */
-            color: #ffffff;
-            border: none;
-            padding: 12px 20px;
-            font-family: 'Pretendard', sans-serif;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 5px;
-            margin-top: 15px;
-            transition: background-color 0.3s ease;
-        }
-        .update-button:hover {
-            background-color: #4cae4c;
-        }
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>동적 룩북 모듈</title>
+
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+    <style>
+
+        body {
+
+            font-family: 'Pretendard', sans-serif;
+
+            background-color: #ffffff; /* 흰색 배경 */
+
+            display: flex;
+
+            flex-direction: column; /* 세로로 정렬 */
+
+            align-items: center; /* 가운데 정렬 */
+
+            min-height: 100vh;
+
+            margin: 0;
+
+            padding: 40px 20px; /* 상하좌우 패딩 */
+
+            box-sizing: border-box;
+
+        }
 
 
-        /* 룩북 모듈 스타일 */
-        .lookbook-module {
-            max-width: 600px; /* 화면에 보여지는 최대 너비 */
-            width: 100%; /* 화면 크기에 따라 유동적으로 너비 조정 */
-            background-color: #ffffff; /* 초기 흰색 배경 */
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            gap: 25px; /* 각 섹션 사이 간격 */
-            position: relative; /* 버튼 위치 조정을 위해 추가 */
-            border: 2px solid #36474F; /* 테두리 색상 추가 */
-            padding: 40px 60px; /* 양옆 여백 추가 및 상하 패딩 조정 */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 그림자 효과 추가 */
-            transition: background-color 0.3s ease; /* 배경색 변경 시 부드러운 전환 효과 */
-            margin: 0 auto; /* 중앙 정렬 */
-        }
 
-        /* 이미지 다운로드 버튼 스타일 */
-        .download-button {
-            background-color: #36474F; /* 테두리 색상과 유사하게 */
-            color: #ffffff;
-            border: none;
-            padding: 12px 20px;
-            font-family: 'Pretendard', sans-serif;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 5px;
-            margin-top: 10px;
-            transition: background-color 0.3s ease;
-            align-self: stretch;
-        }
-        .download-button:hover {
-            background-color: #2a363d; /* 호버 시 색상 변경 */
-        }
+        /* 입력 폼 스타일 */
 
-        /* 메인 타이틀 (USP) */
-        .main-title {
-            font-size: 32px; /* 폰트 크기 조정 */
-            font-weight: bold;
-            color: #333; /* 초기 폰트 색상 */
-            line-height: 1.3;
-            margin-bottom: 20px;
-            transition: color 0.3s ease; /* 폰트 색상 변경 시 부드러운 전환 효과 */
-        }
+        .input-form {
 
-        /* 상세 설명 (USP) */
-        .description-text {
-            font-size: 20px; /* 폰트 크기 조정 */
-            line-height: 1.6;
-            color: #555; /* 초기 폰트 색상 */
-            margin-bottom: 30px;
-            word-break: keep-all; /* 한국어 단어 단위로 줄바꿈 */
-            overflow-wrap: break-word; /* 긴 단어가 있을 경우 단어 단위로 줄바꿈 */
-            transition: color 0.3s ease; /* 폰트 색상 변경 시 부드러운 전환 효과 */
-        }
+            max-width: 600px;
 
-        /* 상품 이미지 컨테이너 */
-        .product-image-container {
-            position: relative;
-            width: 100%;
-            padding-bottom: 125%; /* 이미지 비율 조정 */
-            overflow: hidden;
-            background-color: #f0f0f0; /* 로딩 중 배경색 */
-        }
-        .product-image-container img {
-            position: absolute;
-            top: -1px; /* 미세한 줄 제거를 위해 이미지 확장 */
-            left: -1px; /* 미세한 줄 제거를 위해 이미지 확장 */
-            width: calc(100% + 2px); /* 미세한 줄 제거를 위해 이미지 확장 */
-            height: calc(100% + 2px); /* 미세한 줄 제거를 위해 이미지 확장 */
-            object-fit: cover;
-            display: block;
-        }
+            width: 100%;
 
-        /* 하단 상세 정보 (브랜드, 상품명, 할인율, 가격) */
-        .bottom-details {
-            display: flex;
-            flex-direction: column; /* 세로로 정렬 */
-            gap: 8px; /* 간격 조정 */
-            margin-top: 30px;
-            padding-top: 20px;
-            align-items: flex-start; /* 왼쪽 정렬 */
-        }
+            background-color: #f9f9f9;
 
-        .detail-item {
-            font-size: 14px; /* 폰트 크기 조정 (브랜드, 상품명 등 라벨) */
-            color: #666; /* 초기 폰트 색상 */
-            transition: color 0.3s ease; /* 폰트 색상 변경 시 부드러운 전환 효과 */
-        }
+            border: 1px solid #eee;
 
-        .detail-item strong {
-            font-size: 14px; /* 폰트 크기 조정 (브랜드, 상품명 등 값) - 라벨과 동일하게 유지 */
-            font-weight: bold;
-            color: #333; /* 초기 폰트 색상 */
-            transition: color 0.3s ease; /* 폰트 색상 변경 시 부드러운 전환 효과 */
-        }
+            padding: 25px;
 
-        /* 새로운 상품 디테일 섹션 스타일 */
-        .product-detail-section {
-            display: flex;
-            flex-direction: column;
-            gap: 20px; /* 디테일 카드 간 간격 조정 */
-            margin-top: 25px;
-            padding-top: 25px;
-            border-top: 1px solid #ddd; /* 점선을 실선으로 변경 */
-        }
+            border-radius: 8px;
 
-        .detail-card {
-            position: relative;
-            width: 100%;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
+            margin-bottom: 40px; /* 룩북 모듈과의 간격 */
 
-        .detail-image-container {
-            position: relative;
-            width: 100%;
-            padding-bottom: 125%; /* 메인 상품 이미지와 동일한 비율로 조정 */
-            overflow: hidden;
-            background-color: #e0e0e0;
-        }
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
-        .detail-image-container img {
-            position: absolute;
-            top: -1px; /* 미세한 줄 제거를 위해 이미지 확장 */
-            left: -1px; /* 미세한 줄 제거를 위해 이미지 확장 */
-            width: calc(100% + 2px); /* 미세한 줄 제거를 위해 이미지 확장 */
-            height: calc(100% + 2px); /* 미세한 줄 제거를 위해 이미지 확장 */
-            object-fit: cover;
-            display: block;
-        }
+            display: flex;
 
-        .detail-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0)); /* 하단 검은색 블러 */
-            padding: 30px 20px 15px; /* 블러 영역 및 텍스트 패딩 */
-            box-sizing: border-box;
-            color: #ffffff; /* 텍스트 색상 흰색 */
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-        }
+            flex-direction: column;
 
-        .detail-title {
-            font-size: 28px; /* 폰트 크기 조정 */
-            font-weight: bold;
-            margin-bottom: 5px;
-            line-height: 1.3;
-        }
+            gap: 15px;
 
-        .detail-description {
-            font-size: 20px; /* 폰트 크기 조정 */
-            line-height: 1.5;
-            color: rgba(255, 255, 255, 0.9);
-            word-break: keep-all;
-            overflow-wrap: break-word;
-        }
+        }
 
-        /* 새로운 상단 정보 섹션 */
-        .top-product-info {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 20px; /* USP와의 간격 */
-            align-items: flex-start; /* 왼쪽 정렬 */
-            color: #333; /* 초기 폰트 색상 */
-            transition: color 0.3s ease; /* 폰트 색상 변경 시 부드러운 전환 효과 */
-        }
+        .input-group {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 5px;
+
+        }
+
+        .input-group label {
+
+            font-size: 15px;
+
+            font-weight: bold;
+
+            color: #333;
+
+        }
+
+        .input-group input[type="text"],
+
+        .input-group textarea {
+
+            width: 100%;
+
+            padding: 10px;
+
+            border: 1px solid #ddd;
+
+            border-radius: 4px;
+
+            font-family: 'Pretendard', sans-serif;
+
+            font-size: 14px;
+
+            box-sizing: border-box;
+
+        }
+
+        .input-group textarea {
+
+            resize: vertical; /* 세로 크기 조절 가능 */
+
+            min-height: 80px;
+
+        }
+
+        .input-group input[type="file"] {
+
+            padding: 5px 0;
+
+        }
+
+        .update-button {
+
+            background-color: #5cb85c; /* 업데이트 버튼 색상 */
+
+            color: #ffffff;
+
+            border: none;
+
+            padding: 12px 20px;
+
+            font-family: 'Pretendard', sans-serif;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            border-radius: 5px;
+
+            margin-top: 15px;
+
+            transition: background-color 0.3s ease;
+
+        }
+
+        .update-button:hover {
+
+            background-color: #4cae4c;
+
+        }
 
 
-        /* 모바일 반응형 */
-        @media (max-width: 768px) {
-            .main-title {
-                font-size: 24px;
-            }
-            .description-text {
-                font-size: 15px;
-            }
-            .detail-overlay {
-                padding: 20px 15px 10px;
-            }
-            .detail-title {
-                font-size: 18px;
-            }
-            .detail-description {
-                font-size: 13px;
-            }
-        }
-    </style>
+
+
+
+        /* 룩북 모듈 스타일 (기존과 동일) */
+
+        .lookbook-module {
+
+            max-width: 600px; /* 룩북 모듈의 최대 너비 */
+
+            width: 100%; /* 화면 크기에 따라 유동적으로 너비 조정 */
+
+            background-color: #ffffff;
+
+            box-sizing: border-box;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 25px; /* 각 섹션 사이 간격 */
+
+            position: relative; /* 버튼 위치 조정을 위해 추가 */
+
+            border: 2px solid #36474F; /* 테두리 색상 추가 */
+
+            padding: 25px; /* 내부 패딩 추가 */
+
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 그림자 효과 추가 */
+
+        }
+
+
+
+        /* 복사하기 버튼 스타일 */
+
+        .copy-button {
+
+            background-color: #36474F; /* 테두리 색상과 유사하게 */
+
+            color: #ffffff;
+
+            border: none;
+
+            padding: 10px 15px;
+
+            font-family: 'Pretendard', sans-serif;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            border-radius: 5px;
+
+            align-self: flex-start; /* 왼쪽 상단 정렬 */
+
+            margin-bottom: 10px; /* 아래 요소와의 간격 */
+
+            transition: background-color 0.3s ease;
+
+        }
+
+        .copy-button:hover {
+
+            background-color: #2a363d; /* 호버 시 색상 변경 */
+
+        }
+
+
+
+        /* 메인 타이틀 */
+
+        .main-title {
+
+            font-size: 28px;
+
+            font-weight: bold;
+
+            color: #333;
+
+            line-height: 1.3;
+
+            margin-bottom: 20px;
+
+        }
+
+
+
+        /* 상세 설명 (USP) */
+
+        .description-text {
+
+            font-size: 16px;
+
+            line-height: 1.6;
+
+            color: #555;
+
+            margin-bottom: 30px;
+
+            word-break: keep-all; /* 한국어 단어 단위로 줄바꿈 */
+
+            overflow-wrap: break-word; /* 긴 단어가 있을 경우 단어 단위로 줄바꿈 */
+
+        }
+
+
+
+        /* 상품 이미지 컨테이너 */
+
+        .product-image-container {
+
+            position: relative;
+
+            width: 100%;
+
+            padding-bottom: 120%; /* 세로로 긴 이미지 비율 (예: 4:5 비율) */
+
+            overflow: hidden;
+
+            background-color: #f0f0f0; /* 로딩 중 배경색 */
+
+        }
+
+        .product-image-container img {
+
+            position: absolute;
+
+            top: 0;
+
+            left: 0;
+
+            width: 100%;
+
+            height: 100%;
+
+            object-fit: cover; /* 이미지가 컨테이너에 꽉 차도록 하면서 비율 유지 */
+
+            display: block;
+
+        }
+
+
+
+        /* 하단 상세 정보 */
+
+        .bottom-details {
+
+            display: flex;
+
+            justify-content: space-between; /* 양쪽 끝 정렬 */
+
+            align-items: flex-end; /* 하단 정렬 */
+
+            margin-top: 30px;
+
+            padding-top: 20px;
+
+            /* border-top: 1px solid #eee; /* 상단 구분선 - 제거 */ */
+
+        }
+
+
+
+        .left-details, .right-details {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 8px;
+
+        }
+
+
+
+        .detail-item {
+
+            font-size: 14px;
+
+            color: #666;
+
+        }
+
+
+
+        .detail-item strong {
+
+            font-weight: bold;
+
+            color: #333;
+
+        }
+
+
+
+        /* 모바일 반응형 */
+
+        @media (max-width: 768px) {
+
+            .main-title {
+
+                font-size: 24px;
+
+            }
+
+            .description-text {
+
+                font-size: 15px;
+
+            }
+
+            .bottom-details {
+
+                flex-direction: column; /* 세로로 쌓기 */
+
+                align-items: flex-start; /* 왼쪽 정렬 */
+
+                gap: 15px;
+
+            }
+
+        }
+
+    </style>
+
 </head>
+
 <body>
-    <div class="input-form">
-        <h2>룩북 정보 입력</h2>
-        <div class="input-group">
-            <label for="uspLine1">USP (첫째 줄):</label>
-            <input type="text" id="uspLine1" value="아뜰리에 마졸리">
-        </div>
-        <div class="input-group">
-            <label for="uspLine2">USP (둘째 줄):</label>
-            <input type="text" id="uspLine2" value="생트로페 썸머 티어드 원피스 1종">
-        </div>
-        <div class="input-group">
-            <label for="description">상품 설명:</label>
-            <textarea id="description">한 벌만으로도 충분히 느껴지는 설렘 가득한 썸머 리조트 무드, 그리고 당신의 완벽한 여름을 위한 선택</textarea>
-        </div>
-        <div class="input-group">
-            <label for="productImage">상품 이미지: <small>*4:5 비율 이미지를 업로드해주세요</small></label>
-            <input type="file" id="productImage" accept="image/*">
-        </div>
-        <div class="input-group">
-            <label for="brandName">브랜드명:</label>
-            <input type="text" id="brandName" value="아뜰리에 마졸리">
-        </div>
-        <div class="input-group">
-            <label for="productName">상품명:</label>
-            <input type="text" id="productName" value="생트로페 썸머 티어드 원피스 1종">
-        </div>
-        <div class="input-group">
-            <label for="discountRate">할인율:</label>
-            <input type="text" id="discountRate" value="20%">
-        </div>
-        <div class="input-group">
-            <label for="price">가격:</label>
-            <input type="text" id="price" value="47,920원 (59,900원)">
-        </div>
 
-        <div class="input-group">
-            <label for="lookbookBackgroundColorPicker">룩북 배경색 선택:</label>
-            <input type="color" id="lookbookBackgroundColorPicker" value="#ffffff">
-        </div>
+    <div class="input-form">
 
-        <div class="input-group">
-            <label for="lookbookFontColorPicker">룩북 폰트 색상 선택:</label>
-            <input type="color" id="lookbookFontColorPicker" value="#333333">
-        </div>
+        <h2>룩북 정보 입력</h2>
 
-        <h3>상품 디테일 정보 (최대 3개)</h3>
-        <div class="input-group">
-            <label for="detailImage1">디테일 이미지 1: <small>*4:5 비율 이미지를 업로드해주세요</small></label>
-            <input type="file" id="detailImage1" accept="image/*">
-        </div>
-        <div class="input-group">
-            <label for="detailTitle1">디테일 제목 1:</label>
-            <input type="text" id="detailTitle1" value="마치 입지 않은 듯 가벼운 착용감">
-        </div>
-        <div class="input-group">
-            <label for="detailDescription1">디테일 설명 1:</label>
-            <textarea id="detailDescription1">청량한 여름날, 피부에 닿는 순간 느껴지는 산뜻함과 놀라운 가벼움으로 하루 종일 편안함을 선사해요.</textarea>
-        </div>
+        <div class="input-group">
 
-        <div class="input-group">
-            <label for="detailImage2">디테일 이미지 2: <small>*4:5 비율 이미지를 업로드해주세요</small></label>
-            <input type="file" id="detailImage2" accept="image/*">
-        </div>
-        <div class="input-group">
-            <label for="detailTitle2">디테일 제목 2:</label>
-            <input type="text" id="detailTitle2" value="기분 좋은 바스락거림, 산뜻한 감촉">
-        </div>
-        <div class="input-group">
-            <label for="detailDescription2">디테일 설명 2:</label>
-            <textarea id="detailDescription2">여름을 위해 특별히 블렌딩된 나일론과 코튼 소재가 선사하는 부드러움, 그리고 3%의 섬세한 신축성으로 움직임마저 편안하게 감싸줘요.</textarea>
-        </div>
+            <label for="uspLine1">USP (첫째 줄):</label>
 
-        <div class="input-group">
-            <label for="detailImage3">디테일 이미지 3: <small>*4:5 비율 이미지를 업로드해주세요</small></label>
-            <input type="file" id="detailImage3" accept="image/*">
-        </div>
-        <div class="input-group">
-            <label for="detailTitle3">디테일 제목 3:</label>
-            <input type="text" id="detailTitle3" value=""> </div>
-        <div class="input-group">
-            <label for="detailDescription3">디테일 설명 3:</label>
-            <textarea id="detailDescription3"></textarea> </div>
+            <input type="text" id="uspLine1" value="바쁜 아침, 한 벌로 스타일링 완성">
 
-        <button class="update-button" id="updateLookbook">룩북 업데이트</button>
-        <button class="download-button" id="downloadButton">[이미지로 다운]</button>
-    </div>
+        </div>
 
-    <div class="lookbook-module" id="lookbookModule">
-        <div class="top-product-info">
-            <span class="detail-item">브랜드: <strong id="displayBrandName">아뜰리에 마졸리</strong></span>
-            <span class="detail-item">상품명: <strong id="displayProductName">생트로페 썸머 티어드 원피스 1종</strong></span>
-            <span class="detail-item">할인율: <strong id="displayDiscountRate">20%</strong></span>
-            <span class="detail-item">가격: <strong id="displayPrice">47,920원 (59,900원)</strong></span>
-        </div>
+        <div class="input-group">
 
-        <div class="main-title" id="displayMainTitle">
-            아뜰리에 마졸리<br>생트로페 썸머 티어드 원피스 1종
-        </div>
-        <div class="description-text" id="displayDescription">
-            한 벌만으로도 충분히 느껴지는 설렘 가득한 썸머 리조트 무드, 그리고 당신의 완벽한 여름을 위한 선택
-        </div>
-        <div class="product-image-container">
-            <img id="displayProductImage" src="https://placehold.co/600x750/e0e0e0/000000?text=Product+Image" alt="아뜰리에 마졸리 생트로페 썸머 티어드 원피스">
-        </div>
+            <label for="uspLine2">USP (둘째 줄):</label>
 
-        <div class="product-detail-section" id="productDetailSection">
-            </div>
-    </div>
+            <input type="text" id="uspLine2" value="세련된 플리츠 디자인으로 출근길을 더욱 여유롭게">
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Input fields
-            const uspLine1Input = document.getElementById('uspLine1');
-            const uspLine2Input = document.getElementById('uspLine2');
-            const descriptionInput = document.getElementById('description');
-            const productImageInput = document.getElementById('productImage');
-            const brandNameInput = document.getElementById('brandName');
-            const productNameInput = document.getElementById('productName');
-            const discountRateInput = document.getElementById('discountRate');
-            const priceInput = document.getElementById('price');
-            const lookbookBackgroundColorPicker = document.getElementById('lookbookBackgroundColorPicker'); // 룩북 배경색 선택기
-            const lookbookFontColorPicker = document.getElementById('lookbookFontColorPicker'); // 룩북 폰트 색상 선택기
-            const updateButton = document.getElementById('updateLookbook');
-            const downloadButton = document.getElementById('downloadButton'); // 이미지 다운로드 버튼
+        </div>
 
-            // Detail input fields (up to 3)
-            const detailInputs = [];
-            for (let i = 1; i <= 3; i++) {
-                detailInputs.push({
-                    imageInput: document.getElementById(`detailImage${i}`),
-                    titleInput: document.getElementById(`detailTitle${i}`),
-                    descriptionInput: document.getElementById(`detailDescription${i}`)
-                });
-            }
+        <div class="input-group">
 
-            // Lookbook module display elements
-            const displayMainTitle = document.getElementById('displayMainTitle');
-            const displayDescription = document.getElementById('displayDescription');
-            const displayProductImage = document.getElementById('displayProductImage');
-            const displayBrandName = document.getElementById('displayBrandName');
-            const displayProductName = document.getElementById('displayProductName');
-            // !수정됨: 할인율 표시 요소의 ID를 'displayDiscountRate'로 정확히 참조합니다.
-            const displayDiscountRate = document.getElementById('displayDiscountRate'); 
-            // !수정됨: 가격 표시 요소의 ID를 'displayPrice'로 정확히 참조합니다.
-            const displayPrice = document.getElementById('displayPrice'); 
-            const productDetailSection = document.getElementById('productDetailSection');
-            const topProductInfo = document.querySelector('.top-product-info'); // top-product-info 요소 가져오기
+            <label for="description">상품 설명:</label>
 
-            // Image download related elements
-            const lookbookModule = document.getElementById('lookbookModule');
+            <textarea id="description">바쁜 아침에도 스타일링 고민 없이 완벽한 룩을 연출해 보세요. 유러피안 린넨 플리츠 니트탑은 세련된 플리츠 디자인으로 어떤 하의와도 잘 어울려 출근길을 더욱 여유롭고 특별하게 만들어 드립니다. 편안함과 스타일을 동시에 선사하는 이 니트탑으로 당신의 아침을 더욱 빛내세요.</textarea>
 
-            // Function to update the lookbook module
-            function updateLookbook() {
-                displayMainTitle.innerHTML = uspLine1Input.value + '<br>' + uspLine2Input.value;
-                displayDescription.textContent = descriptionInput.value;
-                displayBrandName.textContent = brandNameInput.value;
-                displayProductName.textContent = productNameInput.value;
-                displayDiscountRate.textContent = discountRateInput.value;
-                displayPrice.textContent = priceInput.value;
-                
-                // Clear existing detail cards
-                productDetailSection.innerHTML = '';
+        </div>
 
-                // Add new detail cards based on input
-                detailInputs.forEach((inputs, index) => {
-                    const detailTitle = inputs.titleInput.value;
-                    const detailDescription = inputs.descriptionInput.value;
-                    const detailImageFile = inputs.imageInput.files[0];
+        <div class="input-group">
 
-                    if (detailTitle && detailDescription) { // 이미지 파일이 없어도 텍스트만 있으면 표시
-                        const detailCard = document.createElement('div');
-                        detailCard.classList.add('detail-card');
+            <label for="productImage">상품 이미지:</label>
 
-                        let imageUrl = `https://placehold.co/600x750/e0e0e0/000000?text=Detail+Image+${index + 1}`; // 기본 플레이스홀더
-                        if (detailImageFile) {
-                            const reader = new FileReader();
-                            reader.onload = function(e) {
-                                imageUrl = e.target.result;
-                                detailCard.innerHTML = `
-                                    <div class="detail-image-container">
-                                        <img src="${imageUrl}" alt="Detail Image ${index + 1}">
-                                    </div>
-                                    <div class="detail-overlay">
-                                        <div class="detail-title">${detailTitle}</div>
-                                        <div class="detail-description">${detailDescription}</div>
-                                    </div>
-                                `;
-                                productDetailSection.appendChild(detailCard);
-                            };
-                            reader.readAsDataURL(detailImageFile);
-                        } else {
-                            detailCard.innerHTML = `
-                                <div class="detail-image-container">
-                                    <img src="${imageUrl}" alt="Detail Image ${index + 1}">
-                                </div>
-                                <div class="detail-overlay">
-                                    <div class="detail-title">${detailTitle}</div>
-                                    <div class="detail-description">${detailDescription}</div>
-                                </div>
-                            `;
-                            productDetailSection.appendChild(detailCard);
-                        }
-                    }
-                });
-            }
+            <input type="file" id="productImage" accept="image/*">
 
-            // Handle product image file change
-            productImageInput.addEventListener('change', function(event) {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        displayProductImage.src = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
+        </div>
 
-            // Handle lookbook module background color change
-            lookbookBackgroundColorPicker.addEventListener('input', function(event) {
-                lookbookModule.style.backgroundColor = event.target.value;
-            });
+        <div class="input-group">
 
-            // Handle lookbook module font color change
-            lookbookFontColorPicker.addEventListener('input', function(event) {
-                const newColor = event.target.value;
-                displayMainTitle.style.color = newColor; // USP 제목
-                displayDescription.style.color = newColor; // USP 설명
+            <label for="brandName">브랜드명:</label>
 
-                // top-product-info 내의 모든 텍스트 요소 색상 변경
-                const topProductInfoElements = topProductInfo.querySelectorAll('.detail-item, strong');
-                topProductInfoElements.forEach(element => {
-                    element.style.color = newColor;
-                });
-            });
+            <input type="text" id="brandName" value="아뜰리에 마졸리">
 
-            // "Update Lookbook" button click event
-            updateButton.addEventListener('click', updateLookbook);
+        </div>
 
-            // Initial load update
-            updateLookbook(); // 페이지 로드 시 초기 룩북 업데이트
+        <div class="input-group">
 
-            // Image download functionality
-            if (downloadButton && lookbookModule) {
-                downloadButton.addEventListener('click', function() {
-                    downloadButton.style.display = 'none'; // 버튼 숨기기
+            <label for="productName">상품명:</label>
 
-                    html2canvas(lookbookModule, {
-                        scale: 2, // 600px 너비의 룩북 모듈을 1200px 해상도로 캡처
-                        useCORS: true,
-                        logging: false,
-                        backgroundColor: lookbookModule.style.backgroundColor || '#ffffff' // 현재 룩북 모듈 배경색 반영
-                    }).then(function(canvas) {
-                        downloadButton.style.display = 'block'; // 버튼 다시 표시
+            <input type="text" id="productName" value="유러피안 린넨 플리츠 니트탑">
 
-                        const imageDataURL = canvas.toDataURL('image/png');
-                        const link = document.createElement('a');
-                        link.href = imageDataURL;
-                        link.download = 'lookbook_module.png';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    }).catch(function(error) {
-                        console.error('이미지 저장 중 오류 발생:', error);
-                        downloadButton.style.display = 'block';
-                        const messageBox = document.createElement('div');
-                        messageBox.style.cssText = `
-                            position: fixed;
-                            top: 50%;
-                            left: 50%;
-                            transform: translate(-50%, -50%);
-                            background-color: #fff;
-                            border: 1px solid #ccc;
-                            padding: 20px;
-                            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                            z-index: 1000;
-                            border-radius: 8px;
-                            font-family: 'Pretendard', sans-serif;
-                            text-align: center;
-                        `;
-                        messageBox.innerHTML = `
-                            <p>이미지 저장에 실패했습니다. 다시 시도해주세요.</p>
-                            <button onclick="this.parentNode.remove()" style="
-                                background-color: #36474F;
-                                color: #fff;
-                                border: none;
-                                padding: 10px 20px;
-                                border-radius: 5px;
-                                cursor: pointer;
-                                margin-top: 15px;
-                            ">확인</button>
-                        `;
-                        document.body.appendChild(messageBox);
-                    });
-                });
-            }
-        });
-    </script>
+        </div>
+
+        <div class="input-group">
+
+            <label for="discountRate">할인율:</label>
+
+            <input type="text" id="discountRate" value="60%">
+
+        </div>
+
+        <div class="input-group">
+
+            <label for="price">가격:</label>
+
+            <input type="text" id="price" value="15,960원">
+
+        </div>
+
+        <button class="update-button" id="updateLookbook">룩북 업데이트</button>
+
+    </div>
+
+
+
+    <div class="lookbook-module" id="lookbookModule">
+
+        <button class="copy-button" id="copyButton">[복사하기]</button>
+
+
+
+        <div class="main-title" id="displayMainTitle">
+
+            바쁜 아침, 한 벌로 완성하는<br>세련된 플리츠 니트탑
+
+        </div>
+
+        <div class="description-text" id="displayDescription">
+
+            바쁜 아침에도 스타일링 고민 없이 완벽한 룩을 연출해 보세요. 유러피안 린넨 플리츠 니트탑은 세련된 플리츠 디자인으로 어떤 하의와도 잘 어울려 출근길을 더욱 여유롭고 특별하게 만들어 드립니다. 편안함과 스타일을 동시에 선사하는 이 니트탑으로 당신의 아침을 더욱 빛내세요.
+
+        </div>
+
+        <div class="product-image-container">
+
+            <img id="displayProductImage" src="{CB03A48E-5936-4F73-B1F0-270D7EF4D0D0}.jpg" alt="유러피안 린넨 플리츠 니트탑">
+
+        </div>
+
+        <div class="bottom-details">
+
+            <div class="left-details">
+
+                <span class="detail-item">브랜드: <strong id="displayBrandName">아뜰리에 마졸리</strong></span>
+
+                <span class="detail-item">상품명: <strong id="displayProductName">유러피안 린넨 플리츠 니트탑</strong></span>
+
+            </div>
+
+            <div class="right-details">
+
+                <span class="detail-item">할인율: <strong id="displayDiscountRate">60%</strong></span>
+
+                <span class="detail-item">가격: <strong id="displayPrice">15,960원</strong></span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // 입력 필드 요소들
+
+            const uspLine1Input = document.getElementById('uspLine1');
+
+            const uspLine2Input = document.getElementById('uspLine2');
+
+            const descriptionInput = document.getElementById('description');
+
+            const productImageInput = document.getElementById('productImage');
+
+            const brandNameInput = document.getElementById('brandName');
+
+            const productNameInput = document.getElementById('productName');
+
+            const discountRateInput = document.getElementById('discountRate');
+
+            const priceInput = document.getElementById('price');
+
+            const updateButton = document.getElementById('updateLookbook');
+
+
+
+            // 룩북 모듈 표시 요소들
+
+            const displayMainTitle = document.getElementById('displayMainTitle');
+
+            const displayDescription = document.getElementById('displayDescription');
+
+            const displayProductImage = document.getElementById('displayProductImage');
+
+            const displayBrandName = document.getElementById('displayBrandName');
+
+            const displayProductName = document.getElementById('displayProductName');
+
+            const displayDiscountRate = document.getElementById('displayDiscountRate');
+
+            const displayPrice = document.getElementById('displayPrice');
+
+
+
+            // 이미지 다운로드 관련 요소
+
+            const copyButton = document.getElementById('copyButton');
+
+            const lookbookModule = document.getElementById('lookbookModule');
+
+
+
+            // 룩북 모듈 업데이트 함수
+
+            function updateLookbook() {
+
+                displayMainTitle.innerHTML = uspLine1Input.value + '<br>' + uspLine2Input.value;
+
+                displayDescription.textContent = descriptionInput.value;
+
+                displayBrandName.textContent = brandNameInput.value;
+
+                displayProductName.textContent = productNameInput.value;
+
+                displayDiscountRate.textContent = discountRateInput.value;
+
+                displayPrice.textContent = priceInput.value;
+
+            }
+
+
+
+            // 이미지 파일 변경 시 처리
+
+            productImageInput.addEventListener('change', function(event) {
+
+                const file = event.target.files[0];
+
+                if (file) {
+
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+
+                        displayProductImage.src = e.target.result;
+
+                    };
+
+                    reader.readAsDataURL(file);
+
+                }
+
+            });
+
+
+
+            // "룩북 업데이트" 버튼 클릭 시
+
+            updateButton.addEventListener('click', updateLookbook);
+
+
+
+            // 초기 로드 시 룩북 업데이트
+
+            updateLookbook();
+
+
+
+            // 이미지 다운로드 기능 (기존과 동일)
+
+            if (copyButton && lookbookModule) {
+
+                copyButton.addEventListener('click', function() {
+
+                    copyButton.style.display = 'none'; // 버튼 숨기기
+
+
+
+                    html2canvas(lookbookModule, {
+
+                        scale: 2,
+
+                        useCORS: true,
+
+                        logging: false
+
+                    }).then(function(canvas) {
+
+                        copyButton.style.display = 'block'; // 버튼 다시 표시
+
+                        const imageDataURL = canvas.toDataURL('image/png');
+
+                        const link = document.createElement('a');
+
+                        link.href = imageDataURL;
+
+                        link.download = 'lookbook_module.png';
+
+                        document.body.appendChild(link);
+
+                        link.click();
+
+                        document.body.removeChild(link);
+
+                        console.log('룩북 모듈이 이미지로 저장되었습니다!');
+
+                    }).catch(function(error) {
+
+                        console.error('이미지 저장 중 오류 발생:', error);
+
+                        copyButton.style.display = 'block';
+
+                        alert('이미지 저장에 실패했습니다. 다시 시도해주세요.');
+
+                    });
+
+                });
+
+            }
+
+        });
+
+    </script>
+
 </body>
+
 </html>
