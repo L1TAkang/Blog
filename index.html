@@ -321,20 +321,17 @@
             <input type="text" id="price" value="47,920원 (59,900원)">
         </div>
 
-        <!-- 룩북 모듈 배경색 선택 입력 필드 -->
         <div class="input-group">
             <label for="lookbookBackgroundColorPicker">룩북 배경색 선택:</label>
             <input type="color" id="lookbookBackgroundColorPicker" value="#ffffff">
         </div>
 
-        <!-- 룩북 모듈 폰트 색상 선택 입력 필드 추가 -->
         <div class="input-group">
             <label for="lookbookFontColorPicker">룩북 폰트 색상 선택:</label>
             <input type="color" id="lookbookFontColorPicker" value="#333333">
         </div>
 
         <h3>상품 디테일 정보 (최대 3개)</h3>
-        <!-- Detail 1 -->
         <div class="input-group">
             <label for="detailImage1">디테일 이미지 1: <small>*4:5 비율 이미지를 업로드해주세요</small></label>
             <input type="file" id="detailImage1" accept="image/*">
@@ -348,7 +345,6 @@
             <textarea id="detailDescription1">청량한 여름날, 피부에 닿는 순간 느껴지는 산뜻함과 놀라운 가벼움으로 하루 종일 편안함을 선사해요.</textarea>
         </div>
 
-        <!-- Detail 2 -->
         <div class="input-group">
             <label for="detailImage2">디테일 이미지 2: <small>*4:5 비율 이미지를 업로드해주세요</small></label>
             <input type="file" id="detailImage2" accept="image/*">
@@ -362,27 +358,22 @@
             <textarea id="detailDescription2">여름을 위해 특별히 블렌딩된 나일론과 코튼 소재가 선사하는 부드러움, 그리고 3%의 섬세한 신축성으로 움직임마저 편안하게 감싸줘요.</textarea>
         </div>
 
-        <!-- Detail 3 -->
         <div class="input-group">
             <label for="detailImage3">디테일 이미지 3: <small>*4:5 비율 이미지를 업로드해주세요</small></label>
             <input type="file" id="detailImage3" accept="image/*">
         </div>
         <div class="input-group">
             <label for="detailTitle3">디테일 제목 3:</label>
-            <input type="text" id="detailTitle3" value=""> <!-- 내용 비움 -->
-        </div>
+            <input type="text" id="detailTitle3" value=""> </div>
         <div class="input-group">
             <label for="detailDescription3">디테일 설명 3:</label>
-            <textarea id="detailDescription3"></textarea> <!-- 내용 비움 -->
-        </div>
+            <textarea id="detailDescription3"></textarea> </div>
 
         <button class="update-button" id="updateLookbook">룩북 업데이트</button>
-        <!-- 이미지 다운로드 버튼을 룩북 업데이트 버튼 바로 아래로 이동 -->
         <button class="download-button" id="downloadButton">[이미지로 다운]</button>
     </div>
 
     <div class="lookbook-module" id="lookbookModule">
-        <!-- 새로운 상단 정보 섹션 추가 -->
         <div class="top-product-info">
             <span class="detail-item">브랜드: <strong id="displayBrandName">아뜰리에 마졸리</strong></span>
             <span class="detail-item">상품명: <strong id="displayProductName">생트로페 썸머 티어드 원피스 1종</strong></span>
@@ -400,10 +391,8 @@
             <img id="displayProductImage" src="https://placehold.co/600x750/e0e0e0/000000?text=Product+Image" alt="아뜰리에 마졸리 생트로페 썸머 티어드 원피스">
         </div>
 
-        <!-- 상품 디테일 섹션 -->
         <div class="product-detail-section" id="productDetailSection">
-            <!-- Detail cards will be inserted here by JavaScript -->
-        </div>
+            </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -439,8 +428,10 @@
             const displayProductImage = document.getElementById('displayProductImage');
             const displayBrandName = document.getElementById('displayBrandName');
             const displayProductName = document.getElementById('displayProductName');
-            const displayDiscountRate = document.getElementById('discountRate');
-            const displayPrice = document.getElementById('price');
+            // !수정됨: 할인율 표시 요소의 ID를 'displayDiscountRate'로 정확히 참조합니다.
+            const displayDiscountRate = document.getElementById('displayDiscountRate'); 
+            // !수정됨: 가격 표시 요소의 ID를 'displayPrice'로 정확히 참조합니다.
+            const displayPrice = document.getElementById('displayPrice'); 
             const productDetailSection = document.getElementById('productDetailSection');
             const topProductInfo = document.querySelector('.top-product-info'); // top-product-info 요소 가져오기
 
@@ -455,25 +446,41 @@
                 displayProductName.textContent = productNameInput.value;
                 displayDiscountRate.textContent = discountRateInput.value;
                 displayPrice.textContent = priceInput.value;
-
+                
                 // Clear existing detail cards
                 productDetailSection.innerHTML = '';
 
                 // Add new detail cards based on input
-                // 디테일 입력 필드의 순서(1, 2, 3)와 동일하게 룩북 모듈에 표시됩니다.
                 detailInputs.forEach((inputs, index) => {
                     const detailTitle = inputs.titleInput.value;
                     const detailDescription = inputs.descriptionInput.value;
                     const detailImageFile = inputs.imageInput.files[0];
 
-                    if (detailTitle && detailDescription && detailImageFile) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            const detailCard = document.createElement('div');
-                            detailCard.classList.add('detail-card');
+                    if (detailTitle && detailDescription) { // 이미지 파일이 없어도 텍스트만 있으면 표시
+                        const detailCard = document.createElement('div');
+                        detailCard.classList.add('detail-card');
+
+                        let imageUrl = `https://placehold.co/600x750/e0e0e0/000000?text=Detail+Image+${index + 1}`; // 기본 플레이스홀더
+                        if (detailImageFile) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                imageUrl = e.target.result;
+                                detailCard.innerHTML = `
+                                    <div class="detail-image-container">
+                                        <img src="${imageUrl}" alt="Detail Image ${index + 1}">
+                                    </div>
+                                    <div class="detail-overlay">
+                                        <div class="detail-title">${detailTitle}</div>
+                                        <div class="detail-description">${detailDescription}</div>
+                                    </div>
+                                `;
+                                productDetailSection.appendChild(detailCard);
+                            };
+                            reader.readAsDataURL(detailImageFile);
+                        } else {
                             detailCard.innerHTML = `
                                 <div class="detail-image-container">
-                                    <img src="${e.target.result}" alt="Detail Image ${index + 1}">
+                                    <img src="${imageUrl}" alt="Detail Image ${index + 1}">
                                 </div>
                                 <div class="detail-overlay">
                                     <div class="detail-title">${detailTitle}</div>
@@ -481,127 +488,102 @@
                                 </div>
                             `;
                             productDetailSection.appendChild(detailCard);
-                        };
-                        reader.readAsDataURL(detailImageFile);
-                    } else if (detailTitle && detailDescription) {
-                        // If text exists but no image, use a placeholder image
-                        const detailCard = document.createElement('div');
-                        detailCard.classList.add('detail-card');
-                        detailCard.innerHTML = `
-                            <div class="detail-image-container">
-                                <img src="https://placehold.co/600x750/e0e0e0/000000?text=Detail+Image+${index + 1}" alt="Detail Image ${index + 1}">
-                            </div>
-                            <div class="detail-overlay">
-                                <div class="detail-title">${detailTitle}</div>
-                                <div class="detail-description">${detailDescription}</div>
-                                </div>
-                            `;
-                            productDetailSection.appendChild(detailCard);
                         }
-                    });
-                }
-
-                // Handle product image file change
-                productImageInput.addEventListener('change', function(event) {
-                    const file = event.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            displayProductImage.src = e.target.result;
-                        };
-                        reader.readAsDataURL(file);
                     }
                 });
+            }
 
-                // Handle lookbook module background color change
-                lookbookBackgroundColorPicker.addEventListener('input', function(event) {
-                    lookbookModule.style.backgroundColor = event.target.value;
-                });
-
-                // Handle lookbook module font color change
-                lookbookFontColorPicker.addEventListener('input', function(event) {
-                    const newColor = event.target.value;
-                    displayMainTitle.style.color = newColor; // USP 제목
-                    displayDescription.style.color = newColor; // USP 설명
-
-                    // top-product-info 내의 모든 텍스트 요소 색상 변경
-                    const topProductInfoElements = topProductInfo.querySelectorAll('.detail-item, strong');
-                    topProductInfoElements.forEach(element => {
-                        element.style.color = newColor;
-                    });
-                });
-
-
-                // "Update Lookbook" button click event
-                updateButton.addEventListener('click', updateLookbook);
-
-                // Initial load update
-                updateLookbook();
-
-                // Image download functionality
-                if (downloadButton && lookbookModule) {
-                    downloadButton.addEventListener('click', function() {
-                        downloadButton.style.display = 'none'; // 버튼 숨기기
-
-                        // html2canvas는 DOM 요소를 캡처하므로,
-                        // 화면에 보이는 룩북 모듈의 현재 크기(max-width: 600px)를 기준으로
-                        // scale: 2를 적용하면 1200px 해상도의 이미지가 생성됩니다.
-                        // 폰트 크기는 CSS에 정의된 대로 600px 너비에 맞춰져 있으며,
-                        // scale: 2 적용 시 이미지 내에서 2배로 확대되어 보입니다.
-                        // 따라서 화면에서 보이는 비율과 다운로드 이미지의 비율이 일치하게 됩니다.
-
-                        html2canvas(lookbookModule, {
-                            scale: 2, // 600px 너비의 룩북 모듈을 1200px 해상도로 캡처
-                            useCORS: true,
-                            logging: false,
-                            backgroundColor: lookbookModule.style.backgroundColor || '#ffffff' // 현재 룩북 모듈 배경색 반영
-                        }).then(function(canvas) {
-                            downloadButton.style.display = 'block'; // 버튼 다시 표시
-
-                            const imageDataURL = canvas.toDataURL('image/png');
-                            const link = document.createElement('a');
-                            link.href = imageDataURL;
-                            link.download = 'lookbook_module.png';
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                            console.log('룩북 모듈이 이미지로 저장되었습니다!');
-                        }).catch(function(error) {
-                            console.error('이미지 저장 중 오류 발생:', error);
-                            downloadButton.style.display = 'block';
-                            // Using a custom message box instead of alert()
-                            const messageBox = document.createElement('div');
-                            messageBox.style.cssText = `
-                                position: fixed;
-                                top: 50%;
-                                left: 50%;
-                                transform: translate(-50%, -50%);
-                                background-color: #fff;
-                                border: 1px solid #ccc;
-                                padding: 20px;
-                                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                                z-index: 1000;
-                                border-radius: 8px;
-                                font-family: 'Pretendard', sans-serif;
-                                text-align: center;
-                            `;
-                            messageBox.innerHTML = `
-                                <p>이미지 저장에 실패했습니다. 다시 시도해주세요.</p>
-                                <button onclick="this.parentNode.remove()" style="
-                                    background-color: #36474F;
-                                    color: #fff;
-                                    border: none;
-                                    padding: 10px 20px;
-                                    border-radius: 5px;
-                                    cursor: pointer;
-                                    margin-top: 15px;
-                                ">확인</button>
-                            `;
-                            document.body.appendChild(messageBox);
-                        });
-                    });
+            // Handle product image file change
+            productImageInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        displayProductImage.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
                 }
             });
-        </script>
-    </body>
+
+            // Handle lookbook module background color change
+            lookbookBackgroundColorPicker.addEventListener('input', function(event) {
+                lookbookModule.style.backgroundColor = event.target.value;
+            });
+
+            // Handle lookbook module font color change
+            lookbookFontColorPicker.addEventListener('input', function(event) {
+                const newColor = event.target.value;
+                displayMainTitle.style.color = newColor; // USP 제목
+                displayDescription.style.color = newColor; // USP 설명
+
+                // top-product-info 내의 모든 텍스트 요소 색상 변경
+                const topProductInfoElements = topProductInfo.querySelectorAll('.detail-item, strong');
+                topProductInfoElements.forEach(element => {
+                    element.style.color = newColor;
+                });
+            });
+
+            // "Update Lookbook" button click event
+            updateButton.addEventListener('click', updateLookbook);
+
+            // Initial load update
+            updateLookbook(); // 페이지 로드 시 초기 룩북 업데이트
+
+            // Image download functionality
+            if (downloadButton && lookbookModule) {
+                downloadButton.addEventListener('click', function() {
+                    downloadButton.style.display = 'none'; // 버튼 숨기기
+
+                    html2canvas(lookbookModule, {
+                        scale: 2, // 600px 너비의 룩북 모듈을 1200px 해상도로 캡처
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: lookbookModule.style.backgroundColor || '#ffffff' // 현재 룩북 모듈 배경색 반영
+                    }).then(function(canvas) {
+                        downloadButton.style.display = 'block'; // 버튼 다시 표시
+
+                        const imageDataURL = canvas.toDataURL('image/png');
+                        const link = document.createElement('a');
+                        link.href = imageDataURL;
+                        link.download = 'lookbook_module.png';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }).catch(function(error) {
+                        console.error('이미지 저장 중 오류 발생:', error);
+                        downloadButton.style.display = 'block';
+                        const messageBox = document.createElement('div');
+                        messageBox.style.cssText = `
+                            position: fixed;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            background-color: #fff;
+                            border: 1px solid #ccc;
+                            padding: 20px;
+                            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                            z-index: 1000;
+                            border-radius: 8px;
+                            font-family: 'Pretendard', sans-serif;
+                            text-align: center;
+                        `;
+                        messageBox.innerHTML = `
+                            <p>이미지 저장에 실패했습니다. 다시 시도해주세요.</p>
+                            <button onclick="this.parentNode.remove()" style="
+                                background-color: #36474F;
+                                color: #fff;
+                                border: none;
+                                padding: 10px 20px;
+                                border-radius: 5px;
+                                cursor: pointer;
+                                margin-top: 15px;
+                            ">확인</button>
+                        `;
+                        document.body.appendChild(messageBox);
+                    });
+                });
+            }
+        });
+    </script>
+</body>
 </html>
