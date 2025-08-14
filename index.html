@@ -302,7 +302,24 @@
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
         // --- Firebase 설정 ---
-        const firebaseConfig = JSON.parse('__FIREBASE_CONFIG__');
+        const rawFirebaseConfig = '__FIREBASE_CONFIG__';
+        let firebaseConfig;
+
+        // GitHub Actions replaces the placeholder. In a preview environment where it's not replaced,
+        // we provide dummy data to prevent a JSON parsing error and allow the app to load.
+        if (rawFirebaseConfig.startsWith('{')) {
+            firebaseConfig = JSON.parse(rawFirebaseConfig);
+        } else {
+            console.warn("Firebase config not replaced. Using dummy data for preview. Firebase will not work.");
+            firebaseConfig = {
+                apiKey: "dummy",
+                authDomain: "dummy.firebaseapp.com",
+                projectId: "dummy",
+                storageBucket: "dummy.appspot.com",
+                messagingSenderId: "dummy",
+                appId: "dummy"
+            };
+        }
 
         // Firebase 앱 초기화
         const app = initializeApp(firebaseConfig);
