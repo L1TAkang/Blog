@@ -16,10 +16,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
     
-    <!-- Coloris Color Picker CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@melloware/coloris@0.22.0/dist/coloris.min.css"/>
-    <script src="https://cdn.jsdelivr.net/npm/@melloware/coloris@0.22.0/dist/coloris.min.js"></script>
-
     <style>
         body { font-family: 'Pretendard', sans-serif; }
         .font-noto-serif { font-family: 'Noto Serif KR', serif; }
@@ -126,19 +122,11 @@
             padding: 0.1rem 0.25rem;
             font-size: 0.875rem;
         }
-        
-        /* Coloris 커스텀 스타일 */
-        .color-picker-wrapper .clr-field {
-            width: 2rem;
-            height: 2rem;
-            border: 1px solid #d1d5db;
+        .color-swatch {
+            width: 1.5rem;
+            height: 1.5rem;
             border-radius: 0.25rem;
-            padding: 2px;
-        }
-        .color-picker-wrapper .clr-field button {
-            width: 100%;
-            height: 100%;
-            border-radius: 0.125rem;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -220,13 +208,20 @@
                             <button data-command="setGlobalFontSize" data-value="16px" class="toolbar-btn">작게</button>
                             <button data-command="setGlobalFontSize" data-value="18px" class="toolbar-btn">기본</button>
                             <button data-command="setGlobalFontSize" data-value="20px" class="toolbar-btn">크게</button>
-                             <select id="line-height-select" class="toolbar-select">
-                                <option value="1.2">줄간격 1.2</option>
-                                <option value="1.4">줄간격 1.4</option>
-                                <option value="1.6" selected>줄간격 1.6</option>
-                            </select>
-                            <div class="color-picker-wrapper">
-                                <input type="text" id="coloris-picker" value="#000000" data-coloris>
+                            <div class="relative">
+                                <button id="color-picker-btn" class="toolbar-btn flex flex-col items-center justify-center">
+                                    <span class="font-bold text-lg">A</span>
+                                    <span id="current-color-display" class="block h-1 w-4 rounded" style="background-color: #000000;"></span>
+                                </button>
+                                <div id="color-dropdown" class="hidden absolute top-full left-0 bg-white border border-gray-200 rounded shadow-lg p-2 z-10">
+                                    <div class="grid grid-cols-5 gap-1">
+                                        <div class="color-swatch" style="background-color: #000000;" data-color="#000000"></div>
+                                        <div class="color-swatch" style="background-color: #808080;" data-color="#808080"></div>
+                                        <div class="color-swatch" style="background-color: #800000;" data-color="#800000"></div>
+                                        <div class="color-swatch" style="background-color: #ff0000;" data-color="#ff0000"></div>
+                                        <div class="color-swatch" style="background-color: #0000ff;" data-color="#0000ff"></div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="w-px h-5 bg-gray-300"></div>
                             <button data-command="bold" class="toolbar-btn font-bold">B</button>
@@ -369,7 +364,9 @@
         const deleteConfirmBtn = document.getElementById('delete-confirm-btn');
         const deleteCancelBtn = document.getElementById('delete-cancel-btn');
         const fontFamilySelect = document.getElementById('font-family-select');
-        const lineHeightSelect = document.getElementById('line-height-select');
+        const colorPickerBtn = document.getElementById('color-picker-btn');
+        const colorDropdown = document.getElementById('color-dropdown');
+        const currentColorDisplay = document.getElementById('current-color-display');
         
         // --- Firebase 인증 상태 리스너 ---
         onAuthStateChanged(auth, user => {
@@ -474,10 +471,10 @@
             ul.className = 'space-y-1';
             
             const sortedPosts = [...posts].sort((a, b) => {
+                // 1. 고정 여부로 정렬 (고정된 글이 위로)
                 if (a.isPinned !== b.isPinned) return b.isPinned - a.isPinned;
-                const dateA = a.updatedAt || a.createdAt;
-                const dateB = b.updatedAt || b.createdAt;
-                return dateB - dateA;
+                // 2. 발행일로 정렬 (최신 글이 위로)
+                return b.date.localeCompare(a.date);
             });
 
             if (sortedPosts.length > 0) {
@@ -568,9 +565,7 @@
             editorModal.classList.remove('hidden');
             const sortedPosts = [...posts].sort((a, b) => {
                 if (a.isPinned !== b.isPinned) return b.isPinned - a.isPinned;
-                const dateA = a.updatedAt || a.createdAt;
-                const dateB = b.updatedAt || b.createdAt;
-                return dateB - dateA;
+                return b.date.localeCompare(a.date);
             });
 
             if (sortedPosts.length > 0) {
@@ -594,9 +589,7 @@
             ul.className = 'space-y-1';
             const sortedPosts = [...posts].sort((a, b) => {
                 if (a.isPinned !== b.isPinned) return b.isPinned - a.isPinned;
-                const dateA = a.updatedAt || a.createdAt;
-                const dateB = b.updatedAt || b.createdAt;
-                return dateB - dateA;
+                return b.date.localeCompare(a.date);
             });
             sortedPosts.forEach(post => {
                 const li = document.createElement('li');
@@ -697,30 +690,27 @@
         });
 
         fontFamilySelect.addEventListener('change', (e) => applyStyle('fontFamily', e.target.value));
-        lineHeightSelect.addEventListener('change', (e) => applyStyle('lineHeight', e.target.value));
         
-        // --- Coloris 초기화 및 이벤트 핸들링 ---
-        window.addEventListener('load', () => {
-             Coloris({
-                el: '#coloris-picker',
-                themeMode: 'light',
-                parent: editorToolbar,
-                swatches: [
-                    '#000000', // 검정
-                    '#808080', // 회색
-                    '#800000', // 적고동색
-                    '#ff0000', // 빨강
-                    '#0000ff', // 파랑
-                ],
-                swatchesOnly: true,
-                alpha: false,
-                format: 'hex'
-            });
+        // --- 색상 선택기 로직 ---
+        colorPickerBtn.addEventListener('click', () => {
+            colorDropdown.classList.toggle('hidden');
         });
 
-        document.addEventListener('coloris:pick', event => {
-            applyStyle('foreColor', event.detail.color);
+        colorDropdown.addEventListener('click', (e) => {
+            if (e.target.classList.contains('color-swatch')) {
+                const color = e.target.dataset.color;
+                applyStyle('foreColor', color);
+                currentColorDisplay.style.backgroundColor = color;
+                colorDropdown.classList.add('hidden');
+            }
         });
+
+        document.addEventListener('click', (e) => {
+            if (!colorPickerBtn.contains(e.target) && !colorDropdown.contains(e.target)) {
+                colorDropdown.classList.add('hidden');
+            }
+        });
+
 
         editorContent.addEventListener('blur', (e) => {
             if (editorToolbar.contains(e.relatedTarget)) {
@@ -790,10 +780,6 @@
                 case 'fontFamily':
                     wrapWithSpan({ 'font-family': value });
                     break;
-                
-                case 'lineHeight':
-                    applyBlockStyle({ 'line-height': value });
-                    break;
             }
 
             savedRange = null;
@@ -838,18 +824,6 @@
             const newRange = document.createRange();
             newRange.selectNodeContents(span);
             selection.addRange(newRange);
-        }
-
-        function applyBlockStyle(styles) {
-            const selection = window.getSelection();
-            if (!selection.rangeCount) return;
-            const range = selection.getRangeAt(0);
-            let parent = range.commonAncestorContainer;
-            if (parent.nodeType !== 1) parent = parent.parentNode;
-            const blockElement = parent.closest('p, h2, h3, h4, div');
-            if (blockElement) {
-                Object.assign(blockElement.style, styles);
-            }
         }
 
         document.addEventListener('selectionchange', () => {
@@ -1027,7 +1001,7 @@
 
             } catch (error) {
                 console.error("Unsplash API Error:", error);
-                unsplashResults.innerHTML = `<p class="text-red-500">이미지를 불러오는 데 실패했습니다. ${error.message}</p>`;
+                showAlert("저장에 실패했습니다.", true);
             }
         }
         unsplashSearchBtn.addEventListener('click', () => searchUnsplash(unsplashSearchInput.value));
